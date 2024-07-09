@@ -31,6 +31,11 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
     supported = False
     comment = ' just getting started'
 
+    # msc_geometry = {
+    #     'MSC01': {'default_shape': (8218, 2064),
+    #               'left':  {'shift': (0., -4116.7), 'rotation': 0.},
+    #               'right': {'shift': (0., 0.), 'rotation': 0.}},
+    # }
 
     @classmethod
     def default_pypeit_par(cls):
@@ -88,8 +93,8 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
         par['calibrations']['pixelflatframe']['exprng'] = [0, None]
         par['calibrations']['traceframe']['exprng'] = [0, None]
         par['calibrations']['arcframe']['exprng'] = [1, None]
-        par['calibrations']['standardframe']['exprng'] = [1, 61]
-        par['scienceframe']['exprng'] = [61, None]
+        par['calibrations']['standardframe']['exprng'] = [1, None]
+        par['scienceframe']['exprng'] = [1, None]
 
         return par
 
@@ -107,6 +112,7 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
         self.meta['target'] = dict(ext=0, card='OBJECT')
         self.meta['binning'] = dict(card=None, compound=True)
 
+        #self.meta['dateobs'] = dict(ext=0, card='DATE-OBS')
         self.meta['mjd'] = dict(ext=0, card='MJD')
         self.meta['exptime'] = dict(ext=0, card='EXPTIME')
         self.meta['airmass'] = dict(ext=0, card='AIRMASS')
@@ -140,6 +146,15 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
             # TODO -- CHECK THE FOLLOWING
             binning = parse.binning2string(binspec, binspatial)
             return binning
+        elif meta_key == 'filter1':
+            filter01 = headarr[0].get('FILTER01', 'NONE').upper().strip()
+            if filter01 != 'NONE':
+                return filter01
+            filter02 = headarr[0].get('FILTER02', 'NONE').upper().strip()
+            if filter02 != 'NONE':
+                return filter02
+            filter03 = headarr[0].get('FILTER03', 'NONE').upper().strip()
+            return filter03
         else:
             msgs.error("Not ready for this compound meta")
 
@@ -205,7 +220,7 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
             chip = '1' if det == 1 else '2'
         else:
             # Binning
-            # TODO: Could this be detector dependent??
+            # TODO: Could this be detector dependent?? Ans: NO (EJ)
             binning = self.get_meta_value(self.get_headarr(hdu), 'binning')
             chip = self.get_meta_value(self.get_headarr(hdu), 'detector')
 
@@ -396,7 +411,9 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
         # Start with instrument wide
         par = super().config_specific_par(scifile, inp_par=inp_par)
 
-        if self.get_meta_value(scifile, 'dispname') == 'SCFCGRMB01':
+        grism_ID = self.get_meta_value(scifile, 'dispname')
+
+        if grism_ID == 'SCFCGRMB01':
             par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRMB01.fits'
             par['calibrations']['wavelengths']['method'] = 'full_template'
             par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
@@ -410,6 +427,76 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
         # ----------------------------
         # else:
         #     msgs.error(f'Not ready for this grism {self.get_meta_value(scifile, "dispname")}')
+
+
+        # #75/mm grism
+        # elif grism_ID == 'SCFCGREL01':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGREL01.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+
+        # #150/mm grism
+        # elif grism_ID == 'SCFCGRLD01':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRLD01.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+
+        #300R grism
+        elif grism_ID == 'SCFCGRMR01':
+            #par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRMB01.fits'
+            par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRMR01.fits'
+            par['calibrations']['wavelengths']['method'] = 'full_template'
+            par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+        # #Echelle grism
+        # elif grism_ID == 'SCFCGRHDEC':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHDEC.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+        # #VPH450 grism
+        # elif grism_ID == 'SCFCGRHD45':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHD45.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+
+        # #VPH520 grism
+        elif grism_ID == 'SCFCGRHD52':
+            #par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHD52.fits'
+            par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRMR01.fits'
+            par['calibrations']['wavelengths']['method'] = 'full_template'
+            par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+        # #VPH650 grism
+        elif grism_ID == 'SCFCGRHD65':
+            #par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHD65.fits'
+            par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRMB01.fits'
+            par['calibrations']['wavelengths']['method'] = 'full_template'
+            par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+
+        # #VPH680 grism
+        # elif grism_ID == 'SCFCGRHD68':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHD68.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+
+        # #VPH800 grism
+        # elif grism_ID == 'SCFCGRHD80':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHD80.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+
+        # #VPH950 grism
+        # elif grism_ID == 'SCFCGRHD95':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHD95.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
 
         return par
 
@@ -449,7 +536,10 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
         """
         #return ['dispname', 'dispangle', 'decker', 'detector']
         # TODO -- Consider dispangle
-        return ['dispname', 'decker', 'detector']
+        #return ['dispname', 'decker', 'detector']
+        # NOTE: FOCAS sometimes substitutes a different slit width for say, science than for standard
+        # so we don't want to distingish a unique configuration for 'decker'
+        return ['dispname', 'detector']
 
 
     # TODO -- Convert this into get_comb_group()
@@ -590,6 +680,74 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
 
         return (detector, rawdata, hdu_l, exptime, rawdatasec_img, oscansec_img)
 
+    # def get_mosaic_par(self, mosaic, hdu=None, msc_order=5):
+    #     """
+    #     Return the hard-coded parameters needed to construct detector mosaics
+    #     from unbinned images.
+
+    #     The parameters expect the images to be trimmed and oriented to follow
+    #     the PypeIt shape convention of ``(nspec,nspat)``.  For returned
+    #     lists, the length of the list is the same as the number of detectors in
+    #     the mosaic, and they are ordered by the detector number.
+
+    #     Args:
+    #         mosaic (:obj:`tuple`):
+    #             Tuple of detector numbers used to construct the mosaic.  Must be
+    #             one among the list of possible mosaics as hard-coded by the
+    #             :func:`allowed_mosaics` function.
+    #         hdu (`astropy.io.fits.HDUList`_, optional):
+    #             The open fits file with the raw image of interest.  If not
+    #             provided, frame-dependent detector parameters are set to a
+    #             default.  BEWARE: If ``hdu`` is not provided, the binning is
+    #             assumed to be `1,1`, which will cause faults if applied to
+    #             binned images!
+    #         msc_order (:obj:`int`, optional):
+    #             Order of the interpolation used to construct the mosaic.
+
+    #     Returns:
+    #         :class:`~pypeit.images.mosaic.Mosaic`: Object with the mosaic *and*
+    #         detector parameters.
+    #     """
+
+    #     # Validate the entered (list of) detector(s)
+    #     nimg, _ = self.validate_det(mosaic)
+
+    #     # Index of mosaic in list of allowed detector combinations
+    #     mosaic_id = self.allowed_mosaics.index(mosaic)+1
+    #     detid = f'MSC0{mosaic_id}'
+
+    #     # Get the detectors
+    #     detectors = np.array([self.get_detector_par(det, hdu=hdu) for det in mosaic])
+    #     # Binning *must* be consistent for all detectors
+    #     if any(d.binning != detectors[0].binning for d in detectors[1:]):
+    #         msgs.error('Binning is somehow inconsistent between detectors in the mosaic!')
+
+    #     # Collect the offsets and rotations for *all unbinned* detectors in the
+    #     # full instrument, ordered by the number of the detector.  Detector
+    #     # numbers must be sequential and 1-indexed.
+    #     # See the mosaic documentattion.
+    #     expected_shape = msc_geometry[detid]['default_shape']
+    #     shift = np.array([(msc_geometry[detid]['blue_det']['shift'][0], msc_geometry[detid]['blue_det']['shift'][1]),
+    #                       (msc_geometry[detid]['red_det']['shift'][0],  msc_geometry[detid]['red_det']['shift'][1])])
+
+    #     rotation = np.array([msc_geometry[detid]['blue_det']['rotation'], msc_geometry[detid]['red_det']['rotation']])
+
+    #     # The binning and process image shape must be the same for all images in
+    #     # the mosaic
+    #     binning = tuple(int(b) for b in detectors[0].binning.split(','))
+    #     shape = tuple(n // b for n, b in zip(expected_shape, binning))
+
+    #     msc_sft = [None]*nimg
+    #     msc_rot = [None]*nimg
+    #     msc_tfm = [None]*nimg
+
+    #     for i in range(nimg):
+    #         msc_sft[i] = shift[i]
+    #         msc_rot[i] = rotation[i]
+    #         msc_tfm[i] = build_image_mosaic_transform(shape, msc_sft[i], msc_rot[i], binning)
+
+    #     return Mosaic(mosaic_id, detectors, shape, np.array(msc_sft), np.array(msc_rot),
+    #                   np.array(msc_tfm), msc_order)
 
     @property
     def allowed_mosaics(self):
