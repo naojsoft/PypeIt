@@ -24,7 +24,7 @@ class Identify(scriptbase.ScriptBase):
         parser.add_argument("--wmin", type=float, default=3000.0, help="Minimum wavelength range")
         parser.add_argument("--wmax", type=float, default=50000.0, help="Maximum wavelength range")
         parser.add_argument("--slits", type=str, default='0',
-                            help="Which slit to load for wavelength calibration. " 
+                            help="Which slit to load for wavelength calibration. "
                             "Format should be [0,1,...] for multiple slits, 0 for only one slit. "
                             "If creating a new WaveCalib with the -n flag, this is not necessary.")
         parser.add_argument('-m', '--multi', default=False, action = 'store_true',
@@ -59,7 +59,7 @@ class Identify(scriptbase.ScriptBase):
         import json
 
         import numpy as np
-                
+
         from pypeit import msgs
         from pypeit.spectrographs.util import load_spectrograph
         from pypeit.core.gui.identify import Identify
@@ -101,11 +101,11 @@ class Identify(scriptbase.ScriptBase):
         solnname = WaveCalib.construct_file_name(msarc.calib_key, calib_dir=msarc.calib_dir)
         wv_calib = WaveCalib.from_file(solnname, chk_version=chk_version) \
                         if os.path.exists(solnname) and args.solution else None
-        
+
         # Load the calibration frame (if it exists and is desired).  Bad-pixel mask
         # set to any flagged pixel in Arc.
         wavecal = BuildWaveCalib(msarc, slits, spec, par, lamps, det=args.det,
-                                msbpm=msarc.select_flag())
+                                 msbpm=msarc.select_flag())
 
         # If we are dealing with a multi-trace solution
         if args.multi:
@@ -189,7 +189,7 @@ class Identify(scriptbase.ScriptBase):
                 arcfitter = Identify.initialise(arccen, lamps, slits, slit=int(slit_val), par=par,
                                                 wv_calib_all=wv_calib_slit, wavelim=[args.wmin, args.wmax],
                                                 nonlinear_counts=nonlinear_counts,
-                                                pxtoler=args.pixtol, test=args.test, 
+                                                pxtoler=args.pixtol, test=args.test,
                                                 fwhm=args.fwhm,
                                                 sigdetect=args.sigdetect,
                                                 specname=spec.name,
@@ -218,11 +218,11 @@ class Identify(scriptbase.ScriptBase):
                         wv_fits_arr[-1].fwhm = measured_fwhms[slit_val]
                     waveCalib = wv_calib
 
-            
+
                 else:
                     if np.any(wv_calib.wv_fits):
                         wv_calib.wv_fits[slit_val] = None
-                    else: 
+                    else:
                         wv_fits_arr.append('None')
                     waveCalib = None
                     custom_wav_q = ''
@@ -278,7 +278,7 @@ class Identify(scriptbase.ScriptBase):
             arcfitter = Identify.initialise(arccen, lamps, slits, slit=int(args.slits), par=par,
                                             wv_calib_all=wv_calib, wavelim=[args.wmin, args.wmax],
                                             nonlinear_counts=nonlinear_counts,
-                                            pxtoler=args.pixtol, test=args.test, 
+                                            pxtoler=args.pixtol, test=args.test,
                                             fwhm=args.fwhm,
                                             sigdetect=args.sigdetect,
                                             specname=spec.name,
@@ -303,20 +303,20 @@ class Identify(scriptbase.ScriptBase):
                 waveCalib = None
 
             fits_dicts = None
-            specdata = None
-            slits = None 
+            specdata = arcfitter.specdata
+            #slits = None
             lines_pix_arr = None
             lines_wav_arr = None
-            lines_fit_ord = None 
-            custom_wav = None 
-            custom_wav_ind = None 
+            lines_fit_ord = None
+            custom_wav = None
+            custom_wav_ind = None
         # TODO: Make the following more elegant:
         # fill lines with dummy values to make this work
         # Ask the user if they wish to store the result in PypeIt calibrations
         arcfitter.store_solution(final_fit, slits.binspec,
                                 wvcalib=wv_calib,
                                 rmstol=args.rmstol,
-                                force_save=args.force_save, 
+                                force_save=args.force_save,
                                 multi = args.multi, fits_dicts = fits_dicts,
                                 specdata = np.array(specdata),
                                 slits = slits,
@@ -325,6 +325,3 @@ class Identify(scriptbase.ScriptBase):
                                 lines_fit_ord = np.array(lines_fit_ord),
                                 custom_wav = np.array(custom_wav),
                                 custom_wav_ind = np.array(custom_wav_ind) )
-            
-
-

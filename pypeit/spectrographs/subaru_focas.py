@@ -92,7 +92,7 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
         par['calibrations']['biasframe']['exprng'] = [None, 0.001]
         par['calibrations']['pixelflatframe']['exprng'] = [0, None]
         par['calibrations']['traceframe']['exprng'] = [0, None]
-        par['calibrations']['arcframe']['exprng'] = [1, None]
+        par['calibrations']['arcframe']['exprng'] = [0, None]
         par['calibrations']['standardframe']['exprng'] = [1, None]
         par['scienceframe']['exprng'] = [1, None]
 
@@ -190,6 +190,8 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
             return good_exp & (fitstbl['idname'] == 'DOMEFLAT')
         if ftype in ['arc', 'tilt']:
             return good_exp & (fitstbl['idname'] == 'COMPARISON')
+            # NOTE: good_exp fails for arc frames for some reason
+            return fitstbl['idname'] == 'COMPARISON'
 
         msgs.warn('Cannot determine if frames are of type {0}.'.format(ftype))
         return np.zeros(len(fitstbl), dtype=bool)
@@ -537,8 +539,9 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
         #return ['dispname', 'dispangle', 'decker', 'detector']
         # TODO -- Consider dispangle
         #return ['dispname', 'decker', 'detector']
-        # NOTE: FOCAS sometimes substitutes a different slit width for say, science than for standard
-        # so we don't want to distingish a unique configuration for 'decker'
+        # NOTE: FOCAS sometimes substitutes a different slit width for say,
+        #       science than for standard, so we don't want to distingish
+        #       a unique configuration for 'decker'
         return ['dispname', 'detector']
 
 
