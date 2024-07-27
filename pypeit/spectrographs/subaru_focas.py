@@ -175,6 +175,12 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
             return good_exp & (fitstbl['idname'] == 'DOMEFLAT')
         if ftype in ['arc', 'tilt']:
             return good_exp & (fitstbl['idname'] == 'COMPARISON')
+        # if ftype in ['arc', 'tilt']:
+        # # FOCAS takes arcs whose exposure doesn't pass the good_exp check
+        # #return good_exp & (fitstbl['idname'] == 'COMPARISON')
+        #     return (fitstbl['idname'] == 'COMPARISON')
+
+
 
         msgs.warn('Cannot determine if frames are of type {0}.'.format(ftype))
         return np.zeros(len(fitstbl), dtype=bool)
@@ -376,6 +382,26 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
         else:
             msgs.error(f'Unknown chip: {chip}!')
 
+    def raw_header_cards(self):
+        """
+        Return additional raw header cards to be propagated in
+        downstream output files for configuration identification.
+
+        The list of raw data FITS keywords should be those used to populate
+        the :meth:`~pypeit.spectrographs.spectrograph.Spectrograph.configuration_keys`
+        or are used in :meth:`~pypeit.spectrographs.spectrograph.Spectrograph.config_specific_par`
+        for a particular spectrograph, if different from the name of the
+        PypeIt metadata keyword.
+
+        This list is used by :meth:`~pypeit.spectrographs.spectrograph.Spectrograph.subheader_for_spec`
+        to include additional FITS keywords in downstream output files.
+
+        Returns:
+            :obj:`list`: List of keywords from the raw data files that should
+            be propagated in output files.
+        """
+        return ['DISPERSR']
+    
     def config_specific_par(self, scifile, inp_par=None):
         """
         Modify the PypeIt parameters to hard-wired values used for
@@ -395,6 +421,9 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
         """
         # Start with instrument wide
         par = super().config_specific_par(scifile, inp_par=inp_par)
+        
+        grism_ID = self.get_meta_value(scifile, 'dispname')
+        print("Grism ID:", grism_ID)
 
         if self.get_meta_value(scifile, 'dispname') == 'SCFCGRMB01':
             par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRMB01.fits'
@@ -411,7 +440,79 @@ class SubaruFOCASSpectrograph(spectrograph.Spectrograph):
         # else:
         #     msgs.error(f'Not ready for this grism {self.get_meta_value(scifile, "dispname")}')
 
+
+        # #75/mm grism
+        # elif grism_ID == 'SCFCGREL01':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGREL01.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+
+        # #150/mm grism
+        # elif grism_ID == 'SCFCGRLD01':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRLD01.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+
+        # #300R grism
+        # elif grism_ID == 'SCFCGRMR01':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRMR01.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+        # #Echelle grism
+        # elif grism_ID == 'SCFCGRHDEC':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHDEC.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+        # #VPH450 grism
+        # elif grism_ID == 'SCFCGRHD45':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHD45.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+
+        # #VPH520 grism
+        # elif grism_ID == 'SCFCGRHD52':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHD52.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+        # #VPH650 grism
+        # elif grism_ID == 'SCFCGRHD65':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHD65.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+
+        # #VPH680 grism
+        # elif grism_ID == 'SCFCGRHD68':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHD68.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+        
+        # #VPH800 grism
+        # elif grism_ID == 'SCFCGRHD80':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHD80.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
+
+        # #VPH950 grism
+        # elif grism_ID == 'SCFCGRHD95':
+        #     par['calibrations']['wavelengths']['reid_arxiv'] = 'wvarxiv_subaru_focas_SCFCGRHD95.fits'
+        #     par['calibrations']['wavelengths']['method'] = 'full_template'
+        #     par['calibrations']['wavelengths']['stretch_func'] = 'quadratic'
+
         return par
+
+        # else:
+        #     raise Exception(f"Grism: {grism_ID} is not supported")
+
+
 
     def config_independent_frames(self):
         """
