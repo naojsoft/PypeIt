@@ -24,6 +24,8 @@ following starting points:
 
     - **Echelle data**: :doc:`Gemini GNIRS<gnirs_howto>`
 
+    - **FOCAS data**: :doc:`Subaru FOCAS<focas_howto>`
+
 For additional instrument-specific recommendations, please see the links at the
 bottom of the :doc:`../spectrographs/spectrographs` page.
 
@@ -38,7 +40,9 @@ bottom of the :doc:`../spectrographs/spectrographs` page.
    Keck LRIS <lris_howto>
    Keck MOSFIRE <mosfire_howto>
    Keck NIRES <nires_howto>
+   Keck NIRSPEC <nirspec_high_howto>
    Shane Kast <kast_howto>
+   Subaru FOCAS <focas_howto>
 
 ----
 
